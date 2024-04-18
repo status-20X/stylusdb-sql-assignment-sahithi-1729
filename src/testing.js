@@ -1,6 +1,10 @@
 const {parseQuery} = require('./queryParser');
 const readCSV = require('./csvReader');
 
+const query = 'SELECT student.name, enrollment.course FROM student LEFT JOIN enrollment ON student.id=enrollment.student_id';
+    const result = executeSELECTQuery(query);
+
+    console.log(result);
 // Helper functions for different JOIN types
 function performInnerJoin(data, joinData, joinCondition, fields, table) {
     const result = [];
@@ -91,12 +95,18 @@ function evaluateCondition(row, clause) {
     }
 }
 
-async function executeSELECTQuery(query) {
-    const { fields, table, whereClauses, joinTable, joinCondition,joinType} = parseQuery(query);
-    let data = await readCSV(`${table}.csv`);
+function executeSELECTQuery(query) {
+    const { fields, table, whereClauses, joinTable, joinCondition, joinType } = parseQuery(query);
+    console.log("Join Table:", joinTable); // Log the join table name
+
+    let data =  readCSV(`${table}.csv`);
+    console.log("Main Table Path:", `${table}.csv`); // Log the file path for the main table
 
     if (joinTable && joinCondition) {
-        const joinData = await readCSV(`${joinTable}.csv`);
+        console.log("Join Data Table:", joinTable); // Log the join table name
+        const joinData =  readCSV(`${joinTable}.csv`);
+        console.log("Join Data Table Path:", `${joinTable}.csv`); // Log the file path for the join table
+        
         switch (joinType.toUpperCase()) {
             case 'INNER':
                 data = performInnerJoin(data, joinData, joinCondition, fields, table);
@@ -121,9 +131,10 @@ async function executeSELECTQuery(query) {
         fields.forEach(field => {
             selectedRow[field] = row[field];
         });
-        console.log(selectedRow)
+        console.log(selectedRow);
         return selectedRow;
     });
 }
+
 
 module.exports = executeSELECTQuery;
